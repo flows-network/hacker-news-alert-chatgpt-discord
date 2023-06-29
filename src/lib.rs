@@ -1,22 +1,22 @@
 use anyhow;
-use discord_flows::{model::channel, Bot, DefaultBot};
 use dotenv::dotenv;
-use http_req::{request, request::Request, uri::Uri, request::Method};
+use http_req::{request, request::Method, request::Request, uri::Uri};
 use openai_flows::{
     chat::{ChatModel, ChatOptions},
     OpenAIFlows,
 };
 use schedule_flows::schedule_cron_job;
 use serde::Deserialize;
-use serde_json::{json, Value};
+use serde_json::json;
 use std::env;
 use std::time::{SystemTime, UNIX_EPOCH};
 use web_scraper_flows::get_page_text;
+
 #[no_mangle]
 pub fn run() {
     dotenv().ok();
     let keyword = std::env::var("KEYWORD").unwrap_or("ChatGPT".to_string());
-    schedule_cron_job(String::from("58 * * * *"), keyword, callback);
+    schedule_cron_job(String::from("14 * * * *"), keyword, callback);
 }
 
 #[no_mangle]
@@ -84,9 +84,6 @@ async fn get_summary_truncated(inp: &str) -> anyhow::Result<String> {
 }
 
 pub async fn send_message_wrapper(hit: Hit) -> anyhow::Result<()> {
-    let workspace = env::var("slack_workspace").unwrap_or("secondstate".to_string());
-    let channel = env::var("slack_channel").unwrap_or("test-flow".to_string());
-
     let title = &hit.title;
     let author = &hit.author;
     let post = format!("https://news.ycombinator.com/item?id={}", &hit.object_id);
@@ -109,30 +106,17 @@ pub async fn send_message_wrapper(hit: Hit) -> anyhow::Result<()> {
     let summary = if _text.split_whitespace().count() > 100 {
         get_summary_truncated(&_text).await?
     } else {
-        _text
+        format!("Minimal info found on webpage to warrant a summary, please see original text on the page:\n{_text}")
     };
 
-    //     let discord_msg = format!(
-    //         r#"[{title}]({post})
-    // [post]({inner_url}) by {author}
-    // {summary}"#
-    //     );
-
-    let content_str =
-        format!("- [{title}]({post}) [post]({inner_url}) by {author}\n{summary}");
-
-    let client = DefaultBot {}.get_client();
-    let channel_id = env::var("discord_channel_id").unwrap_or("1112553551789572167".to_string());
-    // let channel_id = channel_id.parse::<u64>().unwrap_or(0);
+    let content_str = format!(
+        "[**{title}**]({post})  *[click link for post]*({inner_url}) by {author}\n{summary}"
+    );
     let params = json!({
-        "content": "placeholder",
         "embeds": [{
             "description": content_str,
         }]
     });
-    // _ = client
-    //     .send_message(channel_id, &json!({ "content": content_str }))
-    //     .await;
 
     let webhook_url = "https://discord.com/api/webhooks/1123731541084872855/LeZ9UKQslNJIOaSOxCuRSyDeerucEkv6_46mPbMwhAHdpIYt3ARud5POnLBdtXoUoLef";
     let uri = Uri::try_from(webhook_url)?;
@@ -148,45 +132,3 @@ pub async fn send_message_wrapper(hit: Hit) -> anyhow::Result<()> {
 
     Ok(())
 }
-
-// pub async fn send_embed_message(channel_id: &str, content_str: &str) -> anyhow::Result<()> {
-//     let webhook_url = "https://discord.com/api/webhooks/1123731541084872855/LeZ9UKQslNJIOaSOxCuRSyDeerucEkv6_46mPbMwhAHdpIYt3ARud5POnLBdtXoUoLef";
-
-//     let uri = Uri::try_from(webhook_url)?;
-
-//     let params = json!({ "content": content_str });
-
-//     let mut writer = Vec::new();
-//     let body = serde_json::to_vec(&params)?;
-
-//     // let bearer_token = format!("Bearer {}", api_token);
-//     let _response = Request::new(&uri)
-//         .method(Method::POST)
-//         // .header("Authorization", &bearer_token)
-//         .header("Content-Type", "application/json")
-//         .header("Content-Length", &body.len())
-//         .body(&body)
-//         .send(&mut writer)?;
-
-//     // let res = serde_json::from_slice::<ChatResponse>(&writer)?;
-
-//     // let mut msg_content = MessageBuilder::new();
-//     // msg_content.push_named_link("hello", "https://example.com");
-//     // let content = msg_content.build();
-
-//     // // Create the response message with the content and the embed
-//     // if let Err(why) = msg
-//     //     .channel_id
-//     //     .send_message(&context.http, |m| {
-//     //         m.content(content).embed(|e| {
-//     //             e.title("Example Embed").colour(2105893);
-//     //             e
-//     //         })
-//     //     })
-//     //     .await
-//     // {
-//     //     println!("Error sending message: {:?}", why);
-//     // }
-
-//     Ok(())
-// }
