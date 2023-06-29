@@ -1,5 +1,5 @@
 use anyhow;
-use discord_flows::{Bot, DefaultBot};
+use discord_flows::{Bot, DefaultBot, model::channel};
 use dotenv::dotenv;
 use http_req::request;
 use openai_flows::{
@@ -16,7 +16,7 @@ use web_scraper_flows::get_page_text;
 pub fn run() {
     dotenv().ok();
     let keyword = std::env::var("KEYWORD").unwrap_or("ChatGPT".to_string());
-    schedule_cron_job(String::from("48 * * * *"), keyword, callback);
+    schedule_cron_job(String::from("59 * * * *"), keyword, callback);
 }
 
 #[no_mangle]
@@ -122,19 +122,24 @@ pub async fn send_message_wrapper(hit: Hit) -> anyhow::Result<()> {
 
     let client = DefaultBot {}.get_client();
     let channel_id = env::var("discord_channel_id").unwrap_or("1112553551789572167".to_string());
-
+let channel_id = channel_id.parse::<u64>().unwrap_or(0);
     let msg_value = json!({
         "content": "placeholder",
         "embeds": [{
             "description": content_str,
         }]
     });
-    _ = client.send_message(1112553551789572167, &msg_value).await;
+    _ = client
+        .send_message(
+            channel_id,
+            &json!({
+        "content": "placeholder"}),
+        )
+        .await;
+    _ = client.send_message(channel_id, &msg_value).await;
 
     Ok(())
 }
-
-
 
 // pub async fn send_embed_message() {
 //     use serenity::builder::CreateEmbed;
