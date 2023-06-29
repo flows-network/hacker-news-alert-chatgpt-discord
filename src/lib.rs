@@ -16,7 +16,7 @@ use web_scraper_flows::get_page_text;
 pub fn run() {
     dotenv().ok();
     let keyword = std::env::var("KEYWORD").unwrap_or("ChatGPT".to_string());
-    schedule_cron_job(String::from("59 * * * *"), keyword, callback);
+    schedule_cron_job(String::from("22 * * * *"), keyword, callback);
 }
 
 #[no_mangle]
@@ -118,25 +118,25 @@ pub async fn send_message_wrapper(hit: Hit) -> anyhow::Result<()> {
     // {summary}"#
     //     );
 
-    let content_str = format!("- [{title}]({post}) [post]({inner_url}) by {author}\n{summary}");
+    let content_str = format!("- {title}\n Link: {post}) Post Link: {inner_url}) by {author}\n{summary}");
 
     let client = DefaultBot {}.get_client();
     let channel_id = env::var("discord_channel_id").unwrap_or("1112553551789572167".to_string());
 let channel_id = channel_id.parse::<u64>().unwrap_or(0);
-    let msg_value = json!({
-        "content": "placeholder",
-        "embeds": [{
-            "description": content_str,
-        }]
-    });
+    // let msg_value = json!({
+    //     "content": "placeholder",
+    //     "embeds": [{
+    //         "description": content_str,
+    //     }]
+    // });
     _ = client
         .send_message(
             channel_id,
             &json!({
-        "content": "placeholder"}),
+        "content": content_str}),
         )
         .await;
-    _ = client.send_message(channel_id, &msg_value).await;
+    // _ = client.send_message(channel_id, &msg_value).await;
 
     Ok(())
 }
