@@ -8,15 +8,15 @@ use openai_flows::{
 };
 use schedule_flows::schedule_cron_job;
 use serde::Deserialize;
+use serde_json::{json, Value};
 use std::env;
 use std::time::{SystemTime, UNIX_EPOCH};
 use web_scraper_flows::get_page_text;
-use serde_json::{json, Value};
 #[no_mangle]
 pub fn run() {
     dotenv().ok();
     let keyword = std::env::var("KEYWORD").unwrap_or("ChatGPT".to_string());
-    schedule_cron_job(String::from("33 * * * *"), keyword, callback);
+    schedule_cron_job(String::from("48 * * * *"), keyword, callback);
 }
 
 #[no_mangle]
@@ -112,36 +112,29 @@ pub async fn send_message_wrapper(hit: Hit) -> anyhow::Result<()> {
         _text
     };
 
-//     let discord_msg = format!(
-//         r#"[{title}]({post})
-// [post]({inner_url}) by {author}
-// {summary}"#
-//     );
+    //     let discord_msg = format!(
+    //         r#"[{title}]({post})
+    // [post]({inner_url}) by {author}
+    // {summary}"#
+    //     );
 
     let content_str = format!("- [{title}]({post}) [post]({inner_url}) by {author}\n{summary}");
-    let discord_msg = json!({
-        "description": content_str,
-    });
 
-    send_discord_message(discord_msg).await;
+    let client = DefaultBot {}.get_client();
+    let channel_id = env::var("discord_channel_id").unwrap_or("1112553551789572167".to_string());
+
+    let msg_value = json!({
+        "content": "placeholder",
+        "embeds": [{
+            "description": content_str,
+        }]
+    });
+    _ = client.send_message(1112553551789572167, &msg_value).await;
 
     Ok(())
 }
 
-pub async fn send_discord_message(msg: Value) {
-    let client = DefaultBot {}.get_client();
-    let channel_id = env::var("discord_channel_id").unwrap_or("1112553551789572167".to_string());
 
-
-    _ = client
-        .send_message(
-            1112553551789572167,
-            &serde_json::json!({
-                "content": msg,
-            }),
-        )
-        .await;
-}
 
 // pub async fn send_embed_message() {
 //     use serenity::builder::CreateEmbed;

@@ -1,0 +1,43 @@
+{
+    "id": "859303273597747281",
+    "channelId": "858828282926710785",
+    "guildId": "859079709056262218",
+    "author": {
+        "id": "213567894687727617",
+        "username": "User",
+        "avatar": "a_0389c1a14e4a3109e7a332f8489888c7",
+        "discriminator": "1234",
+        "public_flags": 0
+    },
+    "member": {
+        "nick": "Nickname",
+        "roles": [
+            "859090974109270107"
+        ],
+        "joined_at": "2021-01-13T19:55:29.564Z",
+        "premium_since": null,
+        "deaf": false,
+        "mute": false
+    },
+    "content": "Hello, World!",
+    "timestamp": "2023-06-28T12:01:22.698Z",
+    "edited_timestamp": null,
+    "tts": false,
+    "mention_everyone": false,
+    "mentions": [],
+    "mention_roles": [],
+    "attachments": [],
+    "embeds": [],
+    "reactions": [
+        {
+            "count": 1,
+            "me": false,
+            "emoji": {
+                "id": null,
+                "name": "👍"
+            }
+        }
+    ],
+    "pinned": false,
+    "type": 0
+}
