@@ -1,7 +1,7 @@
 use anyhow;
-use discord_flows::{Bot, DefaultBot, model::channel};
+use discord_flows::{model::channel, Bot, DefaultBot};
 use dotenv::dotenv;
-use http_req::request;
+use http_req::{request, request::Request, uri::Uri};
 use openai_flows::{
     chat::{ChatModel, ChatOptions},
     OpenAIFlows,
@@ -118,11 +118,12 @@ pub async fn send_message_wrapper(hit: Hit) -> anyhow::Result<()> {
     // {summary}"#
     //     );
 
-    let content_str = format!("- {title}\n Link: {post}) Post Link: {inner_url}) by {author}\n{summary}");
+    let content_str =
+        format!("- {title}\n Link: {post}) Post Link: {inner_url}) by {author}\n{summary}");
 
     let client = DefaultBot {}.get_client();
     let channel_id = env::var("discord_channel_id").unwrap_or("1112553551789572167".to_string());
-let channel_id = channel_id.parse::<u64>().unwrap_or(0);
+    let channel_id = channel_id.parse::<u64>().unwrap_or(0);
     // let msg_value = json!({
     //     "content": "placeholder",
     //     "embeds": [{
@@ -130,41 +131,51 @@ let channel_id = channel_id.parse::<u64>().unwrap_or(0);
     //     }]
     // });
     _ = client
-        .send_message(
-            channel_id,
-            &json!({
-        "content": content_str}),
-        )
+        .send_message(channel_id, &json!({ "content": content_str }))
         .await;
     // _ = client.send_message(channel_id, &msg_value).await;
 
     Ok(())
 }
 
-// pub async fn send_embed_message() {
-//     use serenity::builder::CreateEmbed;
-//     use serenity::model::channel::Message;
-//     use serenity::model::gateway::Ready;
-//     use serenity::prelude::*;
-//     use serenity::utils::MessageBuilder;
+pub async fn send_embed_message(channel_id: &str, content_str: &str) -> anyhow::Result<()> {
+    let webhook_url = "https://discord.com/api/webhooks/1123731541084872855/LeZ9UKQslNJIOaSOxCuRSyDeerucEkv6_46mPbMwhAHdpIYt3ARud5POnLBdtXoUoLef";
 
-//     use serenity::utils::EmbedMessageBuilding;
+    let uri = Uri::try_from(webhook_url)?;
 
-//     let mut msg_content = MessageBuilder::new();
-//     msg_content.push_named_link("hello", "https://example.com");
-//     let content = msg_content.build();
+    let params = json!({ "content": content_str });
 
-//     // Create the response message with the content and the embed
-//     if let Err(why) = msg
-//         .channel_id
-//         .send_message(&context.http, |m| {
-//             m.content(content).embed(|e| {
-//                 e.title("Example Embed").colour(2105893);
-//                 e
-//             })
-//         })
-//         .await
-//     {
-//         println!("Error sending message: {:?}", why);
-//     }
-// }
+    let mut writer = Vec::new();
+    let body = serde_json::to_vec(&params)?;
+
+    let bearer_token = format!("Bearer {}", api_token);
+    let _response = Request::new(&uri)
+        .method(Method::POST)
+        .header("Authorization", &bearer_token)
+        .header("Content-Type", "application/json")
+        .header("Content-Length", &body.len())
+        .body(&body)
+        .send(&mut writer)?;
+
+    let res = serde_json::from_slice::<ChatResponse>(&writer)?;
+
+    let mut msg_content = MessageBuilder::new();
+    msg_content.push_named_link("hello", "https://example.com");
+    let content = msg_content.build();
+
+    // Create the response message with the content and the embed
+    if let Err(why) = msg
+        .channel_id
+        .send_message(&context.http, |m| {
+            m.content(content).embed(|e| {
+                e.title("Example Embed").colour(2105893);
+                e
+            })
+        })
+        .await
+    {
+        println!("Error sending message: {:?}", why);
+    }
+
+    Ok(())
+}
