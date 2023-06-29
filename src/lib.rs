@@ -1,5 +1,9 @@
 use anyhow;
-use discord_flows::{Bot, DefaultBot, model::channel};
+use discord_flows::{
+    http::{Http, HttpBuilder},
+    model::{channel, Attachment, ChannelId, Message, MessageId},
+    Bot, DefaultBot, ProvidedBot,
+};
 use dotenv::dotenv;
 use http_req::request;
 use openai_flows::{
@@ -12,11 +16,13 @@ use serde_json::{json, Value};
 use std::env;
 use std::time::{SystemTime, UNIX_EPOCH};
 use web_scraper_flows::get_page_text;
+
 #[no_mangle]
 pub fn run() {
     dotenv().ok();
     let keyword = std::env::var("KEYWORD").unwrap_or("ChatGPT".to_string());
-    schedule_cron_job(String::from("22 * * * *"), keyword, callback);
+
+    schedule_cron_job(String::from("50 * * * *"), keyword, callback);
 }
 
 #[no_mangle]
@@ -112,59 +118,22 @@ pub async fn send_message_wrapper(hit: Hit) -> anyhow::Result<()> {
         _text
     };
 
-    //     let discord_msg = format!(
-    //         r#"[{title}]({post})
-    // [post]({inner_url}) by {author}
-    // {summary}"#
-    //     );
+    let content_str =
+        format!("- {title}\n Link: {post})\n Post: {inner_url}) by {author}\n{summary}");
 
-    let content_str = format!("- {title}\n Link: {post}) Post Link: {inner_url}) by {author}\n{summary}");
+    // let client = DefaultBot {}.get_client();
 
-    let client = DefaultBot {}.get_client();
+    let token = env::var("discord_token").unwrap();
+    let discord = HttpBuilder::new(token).build();
     let channel_id = env::var("discord_channel_id").unwrap_or("1112553551789572167".to_string());
-let channel_id = channel_id.parse::<u64>().unwrap_or(0);
-    // let msg_value = json!({
-    //     "content": "placeholder",
-    //     "embeds": [{
-    //         "description": content_str,
-    //     }]
-    // });
-    _ = client
+    let channel_id = channel_id.parse::<u64>().unwrap_or(0);
+
+    let _ = discord
         .send_message(
-            channel_id,
-            &json!({
-        "content": content_str}),
+            channel_id.into(),
+            &serde_json::json!({ "content": content_str }),
         )
         .await;
-    // _ = client.send_message(channel_id, &msg_value).await;
 
     Ok(())
 }
-
-// pub async fn send_embed_message() {
-//     use serenity::builder::CreateEmbed;
-//     use serenity::model::channel::Message;
-//     use serenity::model::gateway::Ready;
-//     use serenity::prelude::*;
-//     use serenity::utils::MessageBuilder;
-
-//     use serenity::utils::EmbedMessageBuilding;
-
-//     let mut msg_content = MessageBuilder::new();
-//     msg_content.push_named_link("hello", "https://example.com");
-//     let content = msg_content.build();
-
-//     // Create the response message with the content and the embed
-//     if let Err(why) = msg
-//         .channel_id
-//         .send_message(&context.http, |m| {
-//             m.content(content).embed(|e| {
-//                 e.title("Example Embed").colour(2105893);
-//                 e
-//             })
-//         })
-//         .await
-//     {
-//         println!("Error sending message: {:?}", why);
-//     }
-// }
