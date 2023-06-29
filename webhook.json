@@ -1,0 +1,25 @@
+{
+    "application_id": null,
+    "avatar": null,
+    "channel_id": "1112553551789572167",
+    "guild_id": "1091003237827608647",
+    "id": "1123731541084872855",
+    "name": "Spidey Bot",
+    "type": 1,
+    "user": {
+        "id": "636636645084495872",
+        "username": "jaykchen",
+        "avatar": null,
+        "discriminator": "0",
+        "public_flags": 0,
+        "flags": 0,
+        "banner": null,
+        "accent_color": null,
+        "global_name": "jaykchen@gmail.com",
+        "avatar_decoration": null,
+        "display_name": "jaykchen@gmail.com",
+        "banner_color": null
+    },
+    "token": "LeZ9UKQslNJIOaSOxCuRSyDeerucEkv6_46mPbMwhAHdpIYt3ARud5POnLBdtXoUoLef",
+    "url": "https://discord.com/api/webhooks/1123731541084872855/LeZ9UKQslNJIOaSOxCuRSyDeerucEkv6_46mPbMwhAHdpIYt3ARud5POnLBdtXoUoLef"
+}

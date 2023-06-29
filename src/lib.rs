@@ -11,12 +11,12 @@ use serde::Deserialize;
 use std::env;
 use std::time::{SystemTime, UNIX_EPOCH};
 use web_scraper_flows::get_page_text;
-
+use serde_json::{json, Value};
 #[no_mangle]
 pub fn run() {
     dotenv().ok();
     let keyword = std::env::var("KEYWORD").unwrap_or("ChatGPT".to_string());
-    schedule_cron_job(String::from("21 * * * *"), keyword, callback);
+    schedule_cron_job(String::from("31 * * * *"), keyword, callback);
 }
 
 #[no_mangle]
@@ -24,7 +24,7 @@ pub fn run() {
 async fn callback(keyword: Vec<u8>) {
     let query = String::from_utf8_lossy(&keyword);
     let now = SystemTime::now();
-    let dura = now.duration_since(UNIX_EPOCH).unwrap().as_secs() - 3600;
+    let dura = now.duration_since(UNIX_EPOCH).unwrap().as_secs() - 10000;
     let url = format!("https://hn.algolia.com/api/v1/search_by_date?tags=story&query={query}&numericFilters=created_at_i>{dura}");
 
     let mut writer = Vec::new();
@@ -70,6 +70,9 @@ async fn get_summary_truncated(inp: &str) -> anyhow::Result<String> {
         model: ChatModel::GPT35Turbo16K,
         restart: true,
         system_prompt: Some(system),
+        max_tokens: Some(128),
+        temperature: Some(0.8),
+        ..Default::default()
     };
 
     let question = format!("summarize this within 100 words: {news_body}");
@@ -109,20 +112,26 @@ pub async fn send_message_wrapper(hit: Hit) -> anyhow::Result<()> {
         _text
     };
 
-    let discord_msg = format!(
-        r#"[{title}]({post})
-[post]({inner_url}) by {author}
-{summary}"#
-    );
+//     let discord_msg = format!(
+//         r#"[{title}]({post})
+// [post]({inner_url}) by {author}
+// {summary}"#
+//     );
 
-    send_discord_message(&discord_msg).await;
+    let content_str = format!("- [{title}]({post}) [post]({inner_url}) by {author}\n{summary}");
+    let discord_msg = json!({
+        "description": content_str,
+    });
+
+    send_discord_message(discord_msg).await;
 
     Ok(())
 }
 
-pub async fn send_discord_message(msg: &str) {
+pub async fn send_discord_message(msg: Value) {
     let client = DefaultBot {}.get_client();
     let channel_id = env::var("discord_channel_id").unwrap_or("1112553551789572167".to_string());
+
 
     _ = client
         .send_message(
@@ -133,3 +142,31 @@ pub async fn send_discord_message(msg: &str) {
         )
         .await;
 }
+
+// pub async fn send_embed_message() {
+//     use serenity::builder::CreateEmbed;
+//     use serenity::model::channel::Message;
+//     use serenity::model::gateway::Ready;
+//     use serenity::prelude::*;
+//     use serenity::utils::MessageBuilder;
+
+//     use serenity::utils::EmbedMessageBuilding;
+
+//     let mut msg_content = MessageBuilder::new();
+//     msg_content.push_named_link("hello", "https://example.com");
+//     let content = msg_content.build();
+
+//     // Create the response message with the content and the embed
+//     if let Err(why) = msg
+//         .channel_id
+//         .send_message(&context.http, |m| {
+//             m.content(content).embed(|e| {
+//                 e.title("Example Embed").colour(2105893);
+//                 e
+//             })
+//         })
+//         .await
+//     {
+//         println!("Error sending message: {:?}", why);
+//     }
+// }

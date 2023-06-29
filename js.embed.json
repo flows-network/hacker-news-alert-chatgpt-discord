@@ -1,0 +1,34 @@
+{
+    "title": "Example Embed",
+    "description": "This is an example description for the embed.",
+    "color": 16711680,
+    "author": {
+        "name": "Author Name",
+        "url": "https://example.com",
+        "icon_url": "https://example.com/icon.png"
+    },
+    "fields": [
+        {
+            "name": "Field 1",
+            "value": "Value 1",
+            "inline": true
+        },
+        {
+            "name": "Field 2",
+            "value": "Value 2",
+            "inline": true
+        }
+    ],
+    "footer": {
+        "text": "Footer text",
+        "icon_url": "https://example.com/icon.png"
+    },
+    "image": {
+        "url": "https://example.com/image.png"
+    },
+    "thumbnail": {
+        "url": "https://example.com/thumbnail.png"
+    },
+    "timestamp": "2023-07-01T00:00:00Z",
+    "url": "https://example.com"
+}
