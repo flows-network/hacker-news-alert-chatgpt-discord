@@ -16,7 +16,7 @@ use web_scraper_flows::get_page_text;
 pub fn run() {
     dotenv().ok();
     let keyword = std::env::var("KEYWORD").unwrap_or("ChatGPT".to_string());
-    schedule_cron_job(String::from("14 * * * *"), keyword, callback);
+    schedule_cron_job(String::from("20 * * * *"), keyword, callback);
 }
 
 #[no_mangle]
@@ -106,11 +106,11 @@ pub async fn send_message_wrapper(hit: Hit) -> anyhow::Result<()> {
     let summary = if _text.split_whitespace().count() > 100 {
         get_summary_truncated(&_text).await?
     } else {
-        format!("Minimal info found on webpage to warrant a summary, please see original text on the page:\n{_text}")
+        format!("Bot found minimal info on webpage to warrant a summary, please see the text on the page the Bot grabbed below if there are any, or use the link above to see the news at its source:\n{_text}")
     };
 
     let content_str = format!(
-        "[**{title}**]({post})  *[click link for post]*({inner_url}) by {author}\n{summary}"
+        "[**{title}**]({post})  [*click link for post*]({inner_url}) by {author}\n{summary}"
     );
     let params = json!({
         "embeds": [{
