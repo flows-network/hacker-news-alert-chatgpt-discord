@@ -1,6 +1,9 @@
 use anyhow;
+use discord_flows::http::HttpBuilder;
 use dotenv::dotenv;
-use http_req::{request, request::Method, request::Request, uri::Uri};
+use flowsnet_platform_sdk::write_error_log;
+
+use http_req::{request, request::Method};
 use openai_flows::{
     chat::{ChatModel, ChatOptions},
     OpenAIFlows,
@@ -13,14 +16,13 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use web_scraper_flows::get_page_text;
 
 #[no_mangle]
-pub fn run() {
+#[tokio::main(flavor = "current_thread")]
+pub async fn run() {
     dotenv().ok();
     let keyword = std::env::var("KEYWORD").unwrap_or("ChatGPT".to_string());
-    schedule_cron_job(String::from("20 * * * *"), keyword, callback);
+    schedule_cron_job(String::from("32 * * * *"), keyword, callback).await;
 }
 
-#[no_mangle]
-#[tokio::main(flavor = "current_thread")]
 async fn callback(keyword: Vec<u8>) {
     let query = String::from_utf8_lossy(&keyword);
     let now = SystemTime::now();
@@ -84,6 +86,10 @@ async fn get_summary_truncated(inp: &str) -> anyhow::Result<String> {
 }
 
 pub async fn send_message_wrapper(hit: Hit) -> anyhow::Result<()> {
+    let token = env::var("discord_token").expect("failed to get discord token");
+    let channel_id = env::var("discord_channel_id").unwrap_or("1112553551789572167".to_string());
+    let discord = HttpBuilder::new(token).build();
+
     let title = &hit.title;
     let author = &hit.author;
     let post = format!("https://news.ycombinator.com/item?id={}", &hit.object_id);
@@ -112,23 +118,35 @@ pub async fn send_message_wrapper(hit: Hit) -> anyhow::Result<()> {
     let content_str = format!(
         "[**{title}**]({post})  [*click link for post*]({inner_url}) by {author}\n{summary}"
     );
-    let params = json!({
+    let content_value = json!(
+        {
         "embeds": [{
             "description": content_str,
         }]
     });
 
-    let webhook_url = "https://discord.com/api/webhooks/1123731541084872855/LeZ9UKQslNJIOaSOxCuRSyDeerucEkv6_46mPbMwhAHdpIYt3ARud5POnLBdtXoUoLef";
-    let uri = Uri::try_from(webhook_url)?;
-    let mut writer = Vec::new();
-    let body = serde_json::to_vec(&params)?;
+    match channel_id.parse::<u64>() {
+        Ok(channel_id) => match discord.send_message(channel_id, &content_value).await {
+            Ok(_) => (),
+            Err(_e) => {
+                write_error_log!("error sending message");
+            }
+        },
+        Err(_e) => {
+            write_error_log!("error parsing channel_id");
+        }
+    }
+    // let webhook_url = "https://discord.com/api/webhooks/1123731541084872855/LeZ9UKQslNJIOaSOxCuRSyDeerucEkv6_46mPbMwhAHdpIYt3ARud5POnLBdtXoUoLef";
+    // let uri = Uri::try_from(webhook_url)?;
+    // let mut writer = Vec::new();
+    // let body = serde_json::to_vec(&params)?;
 
-    let _response = Request::new(&uri)
-        .method(Method::POST)
-        .header("Content-Type", "application/json")
-        .header("Content-Length", &body.len())
-        .body(&body)
-        .send(&mut writer)?;
+    // let _response = Request::new(&uri)
+    //     .method(Method::POST)
+    //     .header("Content-Type", "application/json")
+    //     .header("Content-Length", &body.len())
+    //     .body(&body)
+    //     .send(&mut writer)?;
 
     Ok(())
 }

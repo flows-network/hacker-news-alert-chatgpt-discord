@@ -10,8 +10,8 @@ crate-type = ["cdylib"]
 [dependencies]
 http_req_wasi = { version = "0.11.1", features = ["wasmedge_rustls_api","wasmedge_rustls"] }
 dotenv = "0.15.0"
-openai-flows = "0.8.0"
-schedule-flows = "0.1.10"
+openai-flows = "0.8.2"
+schedule-flows = "0.2.0"
 serde = "1.0.156"
 serde_derive = "1.0.156"
 serde_json = "1.0.94"
@@ -19,3 +19,4 @@ tokio_wasi = { version = "1.25.1", features = ["macros", "rt", "sync"] }
 web-scraper-flows = "0.1.0"
 anyhow = "1.0.71"
 discord-flows = "0.4.0"
+flowsnet-platform-sdk = "0.1.5"
