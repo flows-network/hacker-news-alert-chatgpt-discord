@@ -6,7 +6,7 @@ use discord_flows::{
     ProvidedBot,
 };
 use dotenv::dotenv;
-use flowsnet_platform_sdk::logger;
+use flowsnet_platform_sdk::{logger,write_error_log};
 use http_req::request;
 use openai_flows::{
     chat::{ChatModel, ChatOptions},
@@ -26,7 +26,7 @@ pub async fn run() {
     dotenv().ok();
     let keyword = std::env::var("KEYWORD").unwrap_or("ChatGPT".to_string());
 
-    schedule_cron_job(String::from("21 * * * *"), keyword, callback).await;
+    schedule_cron_job(String::from("29 * * * *"), keyword, callback).await;
 }
 
 async fn callback(keyword: Vec<u8>) {
@@ -93,7 +93,7 @@ async fn get_summary_truncated(inp: &str) -> anyhow::Result<String> {
 
 pub async fn send_message_wrapper(hit: Hit) -> anyhow::Result<()> {
     let token = env::var("discord_token").expect("failed to get discord token");
-    let channel_id = env::var("discord_channel_id").unwrap_or("1112553551789572167".to_string());
+    let raw_channel_id = env::var("discord_channel_id").unwrap_or("1112553551789572167".to_string());
     // let bot = ProvidedBot::new(token);
     let discord = HttpBuilder::new(token).build();
     // let client = bot.get_client();
@@ -132,10 +132,10 @@ pub async fn send_message_wrapper(hit: Hit) -> anyhow::Result<()> {
     // let discord = HttpBuilder::new(token).build();
     let mut channel_id = 0;
 
-    match channel_id.parse::<u64>() {
+    match raw_channel_id.parse::<u64>() {
         Ok(x) => channel_id = x,
 
-        Err(_e) => log::info!("error parsing channelId to u64: {:?}", _e),
+        Err(_) => {write_error_log!("error parsing channelId to u64");},
     }
 
     let _ = discord
