@@ -1,10 +1,5 @@
 use anyhow;
-use discord_flows::{
-    http::{Http, HttpBuilder},
-    // model::{channel, Attachment, ChannelId, Message, MessageId},
-    Bot,
-    ProvidedBot,
-};
+use discord_flows::http::HttpBuilder;
 use dotenv::dotenv;
 use flowsnet_platform_sdk::{logger, write_error_log};
 use http_req::request;
@@ -26,7 +21,7 @@ pub async fn run() {
     dotenv().ok();
     let keyword = std::env::var("KEYWORD").unwrap_or("ChatGPT".to_string());
 
-    schedule_cron_job(String::from("37 * * * *"), keyword, callback).await;
+    schedule_cron_job(String::from("56 * * * *"), keyword, callback).await;
 }
 
 async fn callback(keyword: Vec<u8>) {
@@ -93,11 +88,8 @@ async fn get_summary_truncated(inp: &str) -> anyhow::Result<String> {
 
 pub async fn send_message_wrapper(hit: Hit) -> anyhow::Result<()> {
     let token = env::var("discord_token").expect("failed to get discord token");
-    let raw_channel_id =
-        env::var("discord_channel_id").unwrap_or("1112553551789572167".to_string());
-    // let bot = ProvidedBot::new(token);
+    let channel_id = env::var("discord_channel_id").unwrap_or("1112553551789572167".to_string());
     let discord = HttpBuilder::new(token).build();
-    // let client = bot.get_client();
 
     let title = &hit.title;
     let author = &hit.author;
@@ -127,49 +119,20 @@ pub async fn send_message_wrapper(hit: Hit) -> anyhow::Result<()> {
     let content_str =
         format!("- {title}\n Link: {post})\n Post: {inner_url}) by {author}\n{summary}");
 
-    // let client = DefaultBot {}.get_client();
-
-    // let token = env::var("discord_token").unwrap();
-    // let discord = HttpBuilder::new(token).build();
-    let mut channel_id = 0;
-
-    match raw_channel_id.parse::<u64>() {
-        Ok(x) => channel_id = x,
-
-        Err(_) => {
-            write_error_log!("error parsing channelId to u64");
+    match channel_id.parse::<u64>() {
+        Ok(channel_id) => {
+            match discord
+                .send_message(channel_id, &serde_json::json!({ "content": content_str }))
+                .await
+            {
+                Ok(_) => (),
+                Err(_e) => {
+                    write_error_log!("error sending message");
+                }
+            }
         }
-    }
-
-    match discord
-        .send_message(
-            channel_id.into(),
-            &serde_json::json!({ "content": "it was triggered" }),
-        )
-        .await
-    {
-        Ok(_) => {
-            write_error_log!("supposedly successful sending hardcoded msg");
-        }
-
-        Err(_) => {
-            write_error_log!("error parsing channelId to u64");
-        }
-    }
-
-    match discord
-        .send_message(
-            channel_id.into(),
-            &serde_json::json!({ "content": content_str }),
-        )
-        .await
-    {
-        Ok(_) => {
-            write_error_log!("supposedly successful sending content msg");
-        }
-
-        Err(_) => {
-            write_error_log!("error parsing channelId to u64");
+        Err(_e) => {
+            write_error_log!("error parsing channel_id");
         }
     }
 
