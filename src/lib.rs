@@ -21,7 +21,7 @@ pub async fn run() {
     dotenv().ok();
     let keyword = std::env::var("KEYWORD").unwrap_or("ChatGPT".to_string());
 
-    schedule_cron_job(String::from("56 * * * *"), keyword, callback).await;
+    schedule_cron_job(String::from("37 * * * *"), keyword, callback).await;
 }
 
 async fn callback(keyword: Vec<u8>) {
@@ -116,21 +116,23 @@ pub async fn send_message_wrapper(hit: Hit) -> anyhow::Result<()> {
         format!("Bot found minimal info on webpage to warrant a summary, please see the text on the page the Bot grabbed below if there are any, or use the link above to see the news at its source:\n{_text}")
     };
 
-    let content_str =
-        format!("- {title}\n Link: {post})\n Post: {inner_url}) by {author}\n{summary}");
+    let content_str = format!(
+        "[**{title}**]({post})  [*click link for post*]({inner_url}) by {author}\n{summary}"
+    );
+    let content_value = serde_json::json!(
+        {
+        "embeds": [{
+            "description": content_str,
+        }]
+    });
 
     match channel_id.parse::<u64>() {
-        Ok(channel_id) => {
-            match discord
-                .send_message(channel_id, &serde_json::json!({ "content": content_str }))
-                .await
-            {
-                Ok(_) => (),
-                Err(_e) => {
-                    write_error_log!("error sending message");
-                }
+        Ok(channel_id) => match discord.send_message(channel_id, &content_value).await {
+            Ok(_) => (),
+            Err(_e) => {
+                write_error_log!("error sending message");
             }
-        }
+        },
         Err(_e) => {
             write_error_log!("error parsing channel_id");
         }
