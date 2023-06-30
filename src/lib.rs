@@ -6,7 +6,7 @@ use discord_flows::{
     ProvidedBot,
 };
 use dotenv::dotenv;
-use flowsnet_platform_sdk::{logger,write_error_log};
+use flowsnet_platform_sdk::{logger, write_error_log};
 use http_req::request;
 use openai_flows::{
     chat::{ChatModel, ChatOptions},
@@ -26,7 +26,7 @@ pub async fn run() {
     dotenv().ok();
     let keyword = std::env::var("KEYWORD").unwrap_or("ChatGPT".to_string());
 
-    schedule_cron_job(String::from("29 * * * *"), keyword, callback).await;
+    schedule_cron_job(String::from("40 * * * *"), keyword, callback).await;
 }
 
 async fn callback(keyword: Vec<u8>) {
@@ -93,7 +93,8 @@ async fn get_summary_truncated(inp: &str) -> anyhow::Result<String> {
 
 pub async fn send_message_wrapper(hit: Hit) -> anyhow::Result<()> {
     let token = env::var("discord_token").expect("failed to get discord token");
-    let raw_channel_id = env::var("discord_channel_id").unwrap_or("1112553551789572167".to_string());
+    let raw_channel_id =
+        env::var("discord_channel_id").unwrap_or("1112553551789572167".to_string());
     // let bot = ProvidedBot::new(token);
     let discord = HttpBuilder::new(token).build();
     // let client = bot.get_client();
@@ -135,22 +136,42 @@ pub async fn send_message_wrapper(hit: Hit) -> anyhow::Result<()> {
     match raw_channel_id.parse::<u64>() {
         Ok(x) => channel_id = x,
 
-        Err(_) => {write_error_log!("error parsing channelId to u64");},
+        Err(_) => {
+            write_error_log!("error parsing channelId to u64");
+        }
     }
 
-    let _ = discord
+    match discord
         .send_message(
             channel_id.into(),
             &serde_json::json!({ "content": "it was triggered" }),
         )
-        .await;
+        .await
+    {
+        Ok(_) => {
+            write_error_log!("supposedly successful sending hardcoded msg");
+        }
 
-    let _ = discord
+        Err(_) => {
+            write_error_log!("error parsing channelId to u64");
+        }
+    }
+
+    match discord
         .send_message(
             channel_id.into(),
             &serde_json::json!({ "content": content_str }),
         )
-        .await;
+        .await
+    {
+        Ok(_) => {
+            write_error_log!("supposedly successful sending content msg");
+        }
+
+        Err(_) => {
+            write_error_log!("error parsing channelId to u64");
+        }
+    }
 
     Ok(())
 }
