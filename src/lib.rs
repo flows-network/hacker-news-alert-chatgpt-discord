@@ -1,8 +1,9 @@
 use anyhow;
 use discord_flows::{
-    http::{Http, HttpBuilder},
-    model::{channel, Attachment, ChannelId, Message, MessageId},
-    Bot, DefaultBot, ProvidedBot,
+    // http::{Http, HttpBuilder},
+    // model::{channel, Attachment, ChannelId, Message, MessageId},
+    Bot,
+    ProvidedBot,
 };
 use dotenv::dotenv;
 use http_req::request;
@@ -12,7 +13,7 @@ use openai_flows::{
 };
 use schedule_flows::schedule_cron_job;
 use serde::Deserialize;
-use serde_json::{json, Value};
+use serde_json;
 use std::env;
 use std::time::{SystemTime, UNIX_EPOCH};
 use web_scraper_flows::get_page_text;
@@ -22,7 +23,7 @@ pub fn run() {
     dotenv().ok();
     let keyword = std::env::var("KEYWORD").unwrap_or("ChatGPT".to_string());
 
-    schedule_cron_job(String::from("54 * * * *"), keyword, callback);
+    schedule_cron_job(String::from("21 * * * *"), keyword, callback);
 }
 
 #[no_mangle]
@@ -90,8 +91,10 @@ async fn get_summary_truncated(inp: &str) -> anyhow::Result<String> {
 }
 
 pub async fn send_message_wrapper(hit: Hit) -> anyhow::Result<()> {
-    let workspace = env::var("slack_workspace").unwrap_or("secondstate".to_string());
-    let channel = env::var("slack_channel").unwrap_or("test-flow".to_string());
+    let token = env::var("discord_token").expect("failed to get discord token");
+    let channel_id = env::var("discord_channel_id").unwrap_or("1112553551789572167".to_string());
+    let bot = ProvidedBot::new(token);
+    let client = bot.get_client();
 
     let title = &hit.title;
     let author = &hit.author;
@@ -123,12 +126,11 @@ pub async fn send_message_wrapper(hit: Hit) -> anyhow::Result<()> {
 
     // let client = DefaultBot {}.get_client();
 
-    let token = env::var("discord_token").unwrap();
-    let discord = HttpBuilder::new(token).build();
-    let channel_id = env::var("discord_channel_id").unwrap_or("1112553551789572167".to_string());
+    // let token = env::var("discord_token").unwrap();
+    // let discord = HttpBuilder::new(token).build();
     let channel_id = channel_id.parse::<u64>().unwrap_or(0);
 
-    let _ = discord
+    _ = client
         .send_message(
             channel_id.into(),
             &serde_json::json!({ "content": content_str }),
