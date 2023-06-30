@@ -6,6 +6,7 @@ use discord_flows::{
     ProvidedBot,
 };
 use dotenv::dotenv;
+use flowsnet_platform_sdk::logger;
 use http_req::request;
 use openai_flows::{
     chat::{ChatModel, ChatOptions},
@@ -21,10 +22,11 @@ use web_scraper_flows::get_page_text;
 #[no_mangle]
 #[tokio::main(flavor = "current_thread")]
 pub async fn run() {
+    logger::init();
     dotenv().ok();
     let keyword = std::env::var("KEYWORD").unwrap_or("ChatGPT".to_string());
 
-    schedule_cron_job(String::from("01 * * * *"), keyword, callback).await;
+    schedule_cron_job(String::from("21 * * * *"), keyword, callback).await;
 }
 
 async fn callback(keyword: Vec<u8>) {
@@ -128,7 +130,14 @@ pub async fn send_message_wrapper(hit: Hit) -> anyhow::Result<()> {
 
     // let token = env::var("discord_token").unwrap();
     // let discord = HttpBuilder::new(token).build();
-    let channel_id = channel_id.parse::<u64>().unwrap_or(0);
+    let mut channel_id = 0;
+
+    match channel_id.parse::<u64>() {
+        Ok(x) => channel_id = x,
+
+        Err(_e) => log::info!("error parsing channelId to u64: {:?}", _e),
+    }
+
     let _ = discord
         .send_message(
             channel_id.into(),
