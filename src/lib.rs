@@ -23,7 +23,7 @@ pub fn run() {
     dotenv().ok();
     let keyword = std::env::var("KEYWORD").unwrap_or("ChatGPT".to_string());
 
-    schedule_cron_job(String::from("29 * * * *"), keyword, callback);
+    schedule_cron_job(String::from("35 * * * *"), keyword, callback);
 }
 
 #[no_mangle]
@@ -129,6 +129,12 @@ pub async fn send_message_wrapper(hit: Hit) -> anyhow::Result<()> {
     // let token = env::var("discord_token").unwrap();
     // let discord = HttpBuilder::new(token).build();
     let channel_id = channel_id.parse::<u64>().unwrap_or(0);
+    _ = client
+        .send_message(
+            channel_id.into(),
+            &serde_json::json!({ "content": "it was triggered" }),
+        )
+        .await;
 
     _ = client
         .send_message(
@@ -136,6 +142,7 @@ pub async fn send_message_wrapper(hit: Hit) -> anyhow::Result<()> {
             &serde_json::json!({ "content": content_str }),
         )
         .await;
+
 
     Ok(())
 }
