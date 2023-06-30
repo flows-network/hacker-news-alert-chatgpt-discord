@@ -19,15 +19,14 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use web_scraper_flows::get_page_text;
 
 #[no_mangle]
-pub fn run() {
+#[tokio::main(flavor = "current_thread")]
+pub async fn run() {
     dotenv().ok();
     let keyword = std::env::var("KEYWORD").unwrap_or("ChatGPT".to_string());
 
-    schedule_cron_job(String::from("28 * * * *"), keyword, callback);
+    schedule_cron_job(String::from("01 * * * *"), keyword, callback).await;
 }
 
-#[no_mangle]
-#[tokio::main(flavor = "current_thread")]
 async fn callback(keyword: Vec<u8>) {
     let query = String::from_utf8_lossy(&keyword);
     let now = SystemTime::now();
