@@ -1,6 +1,6 @@
 use anyhow;
 use discord_flows::{
-    // http::{Http, HttpBuilder},
+    http::{Http, HttpBuilder},
     // model::{channel, Attachment, ChannelId, Message, MessageId},
     Bot,
     ProvidedBot,
@@ -23,7 +23,7 @@ pub fn run() {
     dotenv().ok();
     let keyword = std::env::var("KEYWORD").unwrap_or("ChatGPT".to_string());
 
-    schedule_cron_job(String::from("15 * * * *"), keyword, callback);
+    schedule_cron_job(String::from("28 * * * *"), keyword, callback);
 }
 
 #[no_mangle]
@@ -93,8 +93,9 @@ async fn get_summary_truncated(inp: &str) -> anyhow::Result<String> {
 pub async fn send_message_wrapper(hit: Hit) -> anyhow::Result<()> {
     let token = env::var("discord_token").expect("failed to get discord token");
     let channel_id = env::var("discord_channel_id").unwrap_or("1112553551789572167".to_string());
-    let bot = ProvidedBot::new(token);
-    let client = bot.get_client();
+    // let bot = ProvidedBot::new(token);
+    let discord = HttpBuilder::new(token).build();
+    // let client = bot.get_client();
 
     let title = &hit.title;
     let author = &hit.author;
@@ -129,14 +130,14 @@ pub async fn send_message_wrapper(hit: Hit) -> anyhow::Result<()> {
     // let token = env::var("discord_token").unwrap();
     // let discord = HttpBuilder::new(token).build();
     let channel_id = channel_id.parse::<u64>().unwrap_or(0);
-    let _ = client
+    let _ = discord
         .send_message(
             channel_id.into(),
             &serde_json::json!({ "content": "it was triggered" }),
         )
         .await;
 
-    let _ = client
+    let _ = discord
         .send_message(
             channel_id.into(),
             &serde_json::json!({ "content": content_str }),
