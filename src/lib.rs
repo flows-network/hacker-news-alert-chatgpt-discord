@@ -140,26 +140,3 @@ pub async fn send_message_wrapper(hit: Hit) -> anyhow::Result<()> {
 
     Ok(())
 }
-
-pub async fn find_channel_id_by_guild_and_channel_name(
-    client: &Http,
-    guild_name: &str,
-    channel_name: &str,
-) -> anyhow::Result<u64> {
-    // Get the list of all guilds the bot is a member of.
-    let guilds = client.get_guilds(None, None).await?;
-    // Find the guild with the name you're looking for.
-    match guilds.into_iter().find(|g| g.name == guild_name) {
-        Some(guild) => {
-            // Get the list of all channels in the guild.
-            let channels = client.get_channels(*guild.id.as_u64()).await?;
-
-            // Find the channel with the name you're looking for.
-            match channels.into_iter().find(|c| c.name == channel_name) {
-                Some(channel) => Ok(*channel.id.as_u64()),
-                None => Err(anyhow::anyhow!("No channel found with the given name.")),
-            }
-        }
-        None => Err(anyhow::anyhow!("No guild found with the given name.")),
-    }
-}
