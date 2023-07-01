@@ -20,13 +20,13 @@ use web_scraper_flows::get_page_text;
 pub async fn run() {
     dotenv().ok();
     let keyword = std::env::var("KEYWORD").unwrap_or("ChatGPT".to_string());
-    schedule_cron_job(String::from("51 * * * *"), keyword, callback).await;
+    schedule_cron_job(String::from("54 * * * *"), keyword, callback).await;
 }
 
 async fn callback(keyword: Vec<u8>) {
     let query = String::from_utf8_lossy(&keyword);
     let now = SystemTime::now();
-    let dura = now.duration_since(UNIX_EPOCH).unwrap().as_secs() - 3600;
+    let dura = now.duration_since(UNIX_EPOCH).unwrap().as_secs() - 20000;
     let url = format!("https://hn.algolia.com/api/v1/search_by_date?tags=story&query={query}&numericFilters=created_at_i>{dura}");
 
     let mut writer = Vec::new();
