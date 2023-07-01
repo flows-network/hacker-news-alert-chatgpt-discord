@@ -27,7 +27,7 @@ pub async fn run() {
 async fn callback(keyword: Vec<u8>) {
     let query = String::from_utf8_lossy(&keyword);
     let now = SystemTime::now();
-    let dura = now.duration_since(UNIX_EPOCH).unwrap().as_secs() - 3600;
+    let dura = now.duration_since(UNIX_EPOCH).unwrap().as_secs() - 20000;
     let url = format!("https://hn.algolia.com/api/v1/search_by_date?tags=story&query={query}&numericFilters=created_at_i>{dura}");
 
     let mut writer = Vec::new();
