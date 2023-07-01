@@ -88,9 +88,7 @@ async fn get_summary_truncated(inp: &str) -> anyhow::Result<String> {
 
 pub async fn send_message_wrapper(hit: Hit) -> anyhow::Result<()> {
     let token = env::var("discord_token").expect("failed to get discord token");
-    let guild = env::var("discord_server").unwrap_or("myserver".to_string());
-    let channel = env::var("discord_channel").unwrap_or("general".to_string());
-    // let channel_id = env::var("discord_channel_id").unwrap_or("1112553551789572167".to_string());
+    let channel_id = env::var("discord_channel_id").unwrap_or("1112553551789572167".to_string());
     let discord = HttpBuilder::new(token).build();
 
     let title = &hit.title;
