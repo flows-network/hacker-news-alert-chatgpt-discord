@@ -1,5 +1,5 @@
 use anyhow;
-use discord_flows::http::HttpBuilder;
+use discord_flows::http::{HttpBuilder, Http};
 use dotenv::dotenv;
 use flowsnet_platform_sdk::write_error_log;
 
@@ -20,7 +20,7 @@ use web_scraper_flows::get_page_text;
 pub async fn run() {
     dotenv().ok();
     let keyword = std::env::var("KEYWORD").unwrap_or("ChatGPT".to_string());
-    schedule_cron_job(String::from("32 * * * *"), keyword, callback).await;
+    schedule_cron_job(String::from("51 * * * *"), keyword, callback).await;
 }
 
 async fn callback(keyword: Vec<u8>) {
@@ -87,7 +87,9 @@ async fn get_summary_truncated(inp: &str) -> anyhow::Result<String> {
 
 pub async fn send_message_wrapper(hit: Hit) -> anyhow::Result<()> {
     let token = env::var("discord_token").expect("failed to get discord token");
-    let channel_id = env::var("discord_channel_id").unwrap_or("1112553551789572167".to_string());
+    let guild = env::var("discord_server").unwrap_or("myserver".to_string());
+    let channel = env::var("discord_channel").unwrap_or("general".to_string());
+    // let channel_id = env::var("discord_channel_id").unwrap_or("1112553551789572167".to_string());
     let discord = HttpBuilder::new(token).build();
 
     let title = &hit.title;
@@ -125,7 +127,7 @@ pub async fn send_message_wrapper(hit: Hit) -> anyhow::Result<()> {
         }]
     });
 
-    match channel_id.parse::<u64>() {
+    match find_channel_id_by_guild_and_channel_name(&discord, &guild, &channel).await {
         Ok(channel_id) => match discord.send_message(channel_id, &content_value).await {
             Ok(_) => (),
             Err(_e) => {
@@ -133,7 +135,7 @@ pub async fn send_message_wrapper(hit: Hit) -> anyhow::Result<()> {
             }
         },
         Err(_e) => {
-            write_error_log!("error parsing channel_id");
+            write_error_log!("error getting channel_id by guild and channel name");
         }
     }
     // let webhook_url = "https://discord.com/api/webhooks/1123731541084872855/LeZ9UKQslNJIOaSOxCuRSyDeerucEkv6_46mPbMwhAHdpIYt3ARud5POnLBdtXoUoLef";
@@ -149,4 +151,27 @@ pub async fn send_message_wrapper(hit: Hit) -> anyhow::Result<()> {
     //     .send(&mut writer)?;
 
     Ok(())
+}
+
+pub async fn find_channel_id_by_guild_and_channel_name(
+    client: &Http,
+    guild_name: &str,
+    channel_name: &str,
+) -> anyhow::Result<u64> {
+    // Get the list of all guilds the bot is a member of.
+    let guilds = client.get_guilds(None, None).await?;
+    // Find the guild with the name you're looking for.
+    match guilds.into_iter().find(|g| g.name == guild_name) {
+        Some(guild) => {
+            // Get the list of all channels in the guild.
+            let channels = client.get_channels(*guild.id.as_u64()).await?;
+
+            // Find the channel with the name you're looking for.
+            match channels.into_iter().find(|c| c.name == channel_name) {
+                Some(channel) => Ok(*channel.id.as_u64()),
+                None => Err(anyhow::anyhow!("No channel found with the given name.")),
+            }
+        },
+        None => Err(anyhow::anyhow!("No guild found with the given name.")),
+    }
 }
