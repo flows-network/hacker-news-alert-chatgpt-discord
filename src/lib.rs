@@ -117,7 +117,7 @@ pub async fn send_message_wrapper(hit: Hit) -> anyhow::Result<()> {
     };
 
     let content_str = format!(
-        "[**{title}**]({post})  [*click link for post*]({inner_url}) by {author}\n{summary}"
+        "[**{title}**]({post})  [*click link for the original URL*]({inner_url}) by {author}\n{summary}"
     );
     let content_value = serde_json::json!(
         {
