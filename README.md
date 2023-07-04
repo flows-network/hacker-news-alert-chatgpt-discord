@@ -54,7 +54,7 @@ Close the tab and go back to the flow.network page once you are done. Click **Co
 Set up the Discord integration. Enter the `discord_channel_id` and `discord_token` to configure the bot. [Click here to learn how to get a Discord channel id and Discord bot token](https://flows.network/blog/discord-bot-guide).
 
 * `discord_channel_id`: Specify the channel where you want to deploy the bot. Copy and paste the final set of serial numbers from the discord channel's webpage URL.
-* `discord_token`: Get the Discord token from the Discord Developer Portal. This is standalone.
+* `discord_token`: Get the Discord token from the Discord Developer Portal. 
 
 <img width="658" alt="image" src="https://github.com/flows-network/hacker-news-alert-chatgpt-discord/assets/45785633/1af8d30c-89b2-4771-96a2-68c0e9bee3c3">
 
