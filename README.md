@@ -1,4 +1,4 @@
-# <p align="center">HackerNews Alert</p>
+# <p align="center">Summarize Hacker News Posts Using ChatGPT</p>
 <p align="center">
   <a href="https://discord.gg/ccZn9ZMfFf">
     <img src="https://img.shields.io/badge/chat-Discord-7289DA?logo=discord" alt="flows.network Discord">
@@ -6,52 +6,85 @@
   <a href="https://twitter.com/flows_network">
     <img src="https://img.shields.io/badge/Twitter-1DA1F2?logo=twitter&amp;logoColor=white" alt="flows.network Twitter">
   </a>
-   <a href="https://flows.network/flow/new">
+   <a href="https://flows.network/flow/createByTemplate/hacker-news-alert-chatgpt-discord">
     <img src="https://img.shields.io/website?up_message=deploy&url=https%3A%2F%2Fflows.network%2Fflow%2Fnew" alt="Create a flow">
   </a>
 </p>
 
-[Deploy this function on flows.network](#deploy-the-hackernews-alert-app), and you will reveice HackerNews post alerts per hour according to your interests. 
+[Deploy this function on flows.network](#deploy-your-own-hacker-news-summary-bot-in-3steps), and you will receive HackerNews post alerts per hour according to your interests. More importantly, the bot will summarize the Hacker News post with the power of ChatGPT.
 
-<img width="658" alt="image" src="https://user-images.githubusercontent.com/45785633/227419393-d7a438f1-51c9-42bc-bb9a-bac1cd3e5581.png">
+![image](https://github.com/flows-network/hacker-news-alert-chatgpt-discord/assets/45785633/77463fb6-ffa5-4d15-b032-0549b9146786)
 
-## Deploy the HackerNews Alert App
 
-To create this App, we will use [flows.network](https://flows.network/), a serverless platform that makes deploying your own app quick and easy in just three steps.
+## How it works
 
-### Fork this repo
+This is a scheduled hourly bot, meaning it is triggered based on the set time. When the specified time arrives, the bot will search for all the Hacker News posts in the past hour and identify those that contain the specified keyword. Subsequently, the bot will send you a Discord message and utilize ChatGPT to provide a summary of the posts.
 
-Fork [this repo](https://github.com/flows-network/hackernews-alert/) and go to flows.network to deploy your function. 
+## Deploy your own Hacker News summary bot in 3 steps
 
-### Deploy the code on flow.network
+1. Create a bot from a template
+2. Add your OpenAI API key
+3. Configure the bot on a specified Discord channel
 
-1. Sign up for an account for deploying flows on [flows.network](https://flows.network/). It's free.
-2. Click on the "Create a Flow" button to start deploying this APP
-3. Authenticate the [flows.network](https://flows.network/) to access the `hackernews-alert` repo you just forked. 
-![image](https://user-images.githubusercontent.com/45785633/227176033-35a445d8-9e73-4d6d-a919-c68d64cc4075.png)
+### 0 Prerequisites
 
-4. Click on the Advanced text and you will see more settings. Fill in the required Environment Variables. In this example, we have three variables. One is `KEYWORD`: fill in one topic you want to listen to, like `ChatGPT`. The other two variables: `WORKSPACE` and `CHANNEL`: fill in your own workspace and channel
+You will need to bring your own [OpenAI API key](https://openai.com/blog/openai-api). If you do not already have one, [sign up here](https://platform.openai.com/signup).
 
-![image](https://user-images.githubusercontent.com/45785633/227176580-b7e8d31d-b871-45b4-baee-312572615e8a.png)
+You will also need to sign into [flows.network](https://flows.network/) from your GitHub account. It is free.
 
-5. At last, click the Deploy button to deploy your function.
+### 1 Create a bot from a template
 
-### Configure SaaS integrations
 
-After that, the flows.network will direct you to configure the SaaS integration required by your flow.
+Load [the Hacker News Alert ChatGPT Discord template](https://flows.network/flow/createByTemplate/hacker-news-alert-chatgpt-discord).
 
-![image](https://user-images.githubusercontent.com/45785633/227176699-a1ce1c05-02b9-411a-890f-ece033fde38e.png)
+Review the `KEYWORD` variable. Type the keyword you're concerned about. Only support one Keyword here.
 
-Here we can see, we need to configue one SaaS integration.
+Click on the **Create and Build** button.
 
-Click the "Connect/+ Add new authentication" button to authenticate your Slack account. You'll be redirected to a new page where you must grant [flows.network](https://flows.network/) permission to install the `flows-network` bot on your workspace. This workspace is the one you entered into the environment variables above.
+### 2 Add your OpenAI API key
 
-> If you have authenticated the workspace before,you can see the purple Connect button turns gray Connected button. Just ingore this step and click Check button.
+You will now set up OpenAI integration. Click on **Connect**, and enter your key. The default key name is `Default`.
 
-After that, click the Check button to see your flow details. As soon as the flow function's status becomes `ready` and the flow's status became `running`, the Hackernews alert App goes live. You will get a salck message at the 50th minute of every hour !
+[<img width="450" alt="image" src="https://user-images.githubusercontent.com/45785633/222973214-ecd052dc-72c2-4711-90ec-db1ec9d5f24e.png">](https://user-images.githubusercontent.com/45785633/222973214-ecd052dc-72c2-4711-90ec-db1ec9d5f24e.png)
 
-![image](https://user-images.githubusercontent.com/45785633/227177456-a51eacda-2f09-4206-874b-4dc73c3408d8.png)
+Close the tab and go back to the flow.network page once you are done. Click on **Continue**.
 
-> [flows.network](https://flows.network/) is still in its early stages. We would love to hear your feedback!
+### 3 Configure the bot to access Discord
+
+You will now set up the Discord integration. Enter the `discord_channel_id` and `discord_token` to configure the bot. [Click here to learn how to get a Discord channel id and Discord bot token](https://flows.network/blog/discord-bot-guide).
+
+* `discord_channel_id`: specify the channel where you wish to deploy the bot. You can copy and paste the final set of serial numbers from the URL.
+* `discord_token`: get the Discord token from the Discord Developer Portal. This is standalone.
+
+<img width="658" alt="image" src="https://github.com/flows-network/hacker-news-alert-chatgpt-discord/assets/45785633/1af8d30c-89b2-4771-96a2-68c0e9bee3c3">
+
+Finally, click on **Deploy**.
+
+## Wait for the magic!
+
+This is it! You are now on the flow details page waiting for the flow function to build. As soon as the flow's status became `running`, the bot is ready to summarize the Hacker News Post. 
+
+
+## FAQ
+
+### How to customize the time when the bot sends Discord messages
+
+To customize the time when the bot sends Discord messages, you can modify the value provided within the cron expression ("37 * * * *"). This expression represents the bot sending messages at the 37th minute of every hour.
+
+```
+    schedule_cron_job(String::from("37 * * * *"), keyword, callback).await;
+```
+
+To adjust the timing, you can change the number 37 to your desired minute. For example, if you want the messages to be sent at the 15th minute of every hour, you can modify the expression to be ("15 * * * *").
+
+Remember to use the appropriate format and values for the minutes (0-59), hours (0-23), days of the month (1-31), months (1-12), and days of the week (0-7, where both 0 and 7 represent Sunday).
+
+By customizing the cron expression accordingly, you can set the desired timing for the bot to send Discord messages.
+
+
+
+
+
+
 
 
