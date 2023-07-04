@@ -1,4 +1,4 @@
-# <p align="center">Summarize Hacker News Posts Using ChatGPT</p>
+# <p align="center">Summarize Hacker News Posts Using ChatGPT -- Discord version</p>
 <p align="center">
   <a href="https://discord.gg/ccZn9ZMfFf">
     <img src="https://img.shields.io/badge/chat-Discord-7289DA?logo=discord" alt="flows.network Discord">
@@ -41,15 +41,7 @@ Review the `KEYWORD` variable to specify your keyword of interest (supporting on
 
 Click on the **Create and Build** button.
 
-### 2 Add your OpenAI API key
-
-Set up the OpenAI integration. Click on **Connect**, and enter your key. The default key name is `Default`.
-
-[<img width="450" alt="image" src="https://user-images.githubusercontent.com/45785633/222973214-ecd052dc-72c2-4711-90ec-db1ec9d5f24e.png">](https://user-images.githubusercontent.com/45785633/222973214-ecd052dc-72c2-4711-90ec-db1ec9d5f24e.png)
-
-Close the tab and go back to the flow.network page once you are done. Click **Continue**.
-
-### 3 Configure the bot to access Discord
+### 2 Configure the bot to access Discord
 
 Set up the Discord integration. Enter the `discord_channel_id` and `discord_token` to configure the bot. [Click here to learn how to get a Discord channel id and Discord bot token](https://flows.network/blog/discord-bot-guide).
 
@@ -58,7 +50,15 @@ Set up the Discord integration. Enter the `discord_channel_id` and `discord_toke
 
 <img width="658" alt="image" src="https://github.com/flows-network/hacker-news-alert-chatgpt-discord/assets/45785633/1af8d30c-89b2-4771-96a2-68c0e9bee3c3">
 
-Finally, click **Deploy**.
+Click **Continue**.
+
+### 2 Add your OpenAI API key
+
+Set up the OpenAI integration. Click on **Connect**, and enter your key. The default key name is `Default`.
+
+[<img width="450" alt="image" src="https://user-images.githubusercontent.com/45785633/222973214-ecd052dc-72c2-4711-90ec-db1ec9d5f24e.png">](https://user-images.githubusercontent.com/45785633/222973214-ecd052dc-72c2-4711-90ec-db1ec9d5f24e.png)
+
+Close the tab and go back to the flow.network page once you are done. Finally, click **Deploy**.
 
 ## Wait for the magic!
 
