@@ -15,7 +15,7 @@
 
 ![image](https://github.com/flows-network/hacker-news-alert-chatgpt-discord/assets/45785633/77463fb6-ffa5-4d15-b032-0549b9146786)
 
-
+> You can also [send the ChatGPT summary as a Slack Message](https://github.com/flows-network/hacker-news-alert-chatgpt-slack).
 ## How it works
 
 This scheduled bot uses ChatGPT to summarize Hacker News posts. At the specified time, the bot searches for posts from the past hour, filters them based on your chosen keyword, and sends you a Discord message with a summary.
